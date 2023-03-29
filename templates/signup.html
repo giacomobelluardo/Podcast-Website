@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}- Registrati{% endblock %}
+{% block signup_active %}active{% endblock %}
+
+{% block content %}
+<div class="col-5 bg-light p-4 border rounded">
+    <form action="/iscriviti" method="POST" enctype="multipart/form-data">
+        <label for="nicknameInput" class="form-label">Email</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="email" id="emailInput" required minlength="5"
+                maxlength="50">
+        </div>
+        <div class="mb-3">
+            <label for="nomeInput" class="form-label">Nome</label>
+            <input type="nome" class="form-control" name="nome" id="nomeiNPUT" required minlength="2" maxlength="45">
+        </div>
+        <div class="mb-3">
+            <label for="passwordInput" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="passwordInput" required minlength="5"
+                maxlength="20">
+        </div>
+        <div class="mb-3">
+            <label for="typeInput "class="form-label">Seleziona il tipo di registrazione</label>
+            <select type="tipo" name="tipo" class="form-select">
+              <option>Creatore</option>
+              <option selected>Ascoltatore</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Registrati</button>
+    </form>
+</div>
+{% endblock %}

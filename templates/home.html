@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<aside id="myaside" class="col-lg-3 col-md-12">
+  <div class="filtri-data">
+    <ul class="nav flex-column">
+      <h5>Filtri</h5>
+      <li class="nav-item">
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Categorie</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{{url_for('home_filtr', id=1)}}">Attualità</a></li>
+          <li><a class="dropdown-item" href="{{url_for('home_filtr', id=2)}}">Sport e freetime</a></li>
+          <li><a class="dropdown-item" href="{{url_for('home_filtr', id=3)}}">Politica</a></li>
+          <li><a class="dropdown-item" href="{{url_for('home_filtr', id=4)}}">ICT e Web</a></li>
+        </ul>
+      </li>
+
+      {% if current_user.is_authenticated %}
+      <h5>Info</h5>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('about')}}">Chi sono</a>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</aside>
+
+<main class="col-lg-9 col-md-12" id="lista-podcast">
+  {% for podcast in podcasts %}
+  <article class="row border p-2 mx-2 my-4">
+    <div class="col-lg-3 col-md-6 col-sm-12 px-0">
+        <img class="w-100 p-2" src="{{ url_for('static', filename=podcast.immagine) }}" alt="...">
+      </div>
+      <div class="col-lg-9 col-md-6 col-sm-12 content">
+        <section class="d-flex align-items-center mt-2 mb-4 {{'bg-warning p-2 bg-opacity-10' if current_user.id_utente == podcast.id_creatore}}">
+            <h4>{{podcast.titolo}}</h4>
+      </div>
+        </section>
+        <h6 class="text-end"><b>Categoria</b>: {{podcast.categoria |e }}</h6>
+        <p>{{ podcast.descrizione |e }}</p>
+        <a href="{{url_for('podcast', id=podcast.id_podcast)}}" type="button" class="btn btn-primary btn-sm">Visualizza il seguente podcast</a>
+  </article>
+  {% endfor %}
+</main>
+{% if current_user.is_authenticated  and current_user.tipo == 1 %}
+<button type="button" class="mybutton" data-bs-toggle="modal" data-bs-target="#createModal">
+  +
+</button>
+<div class="modal fade" id="createModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Crea un nuovo Podcast!</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/podcasts/new" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="usrnameTextInput" class="form-label">Titolo</label>
+            <input type="text" id="titoloTextInput" name="titolo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="categorie">Categoria:</label>
+            <select name="categoria" class="form-control">
+              <option value="Attualità">Attualità</option>
+              <option value="Sport e freetime">Sport e freetime</option>
+              <option value="Politica">Politica</option>
+              <option value="ICT e Web">ICT e Web</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="postTextarea" class="form-label">Inserisci la descrizione del podcast</label>
+            <textarea class="form-control" id="descrizioneTextarea" name="descrizione" rows="3"
+              placeholder="Inserisci una descrizione per il tuo podcast" required minlength="15" maxlength="700"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="imageFile" class="form-label">Inserisci immagine podcast</label>
+            <input class="form-control" name="immagine" type="file" id="imageFile">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Crea Podcast</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

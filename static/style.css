@@ -1,0 +1,98 @@
+/*CLASSI*/
+.mynavbar {
+    background-color: #0436aa;
+    height: 10rem;
+}
+
+.hide {
+    display: none;
+}
+
+.devimg {
+    display: inline;
+    height: 140px;
+    vertical-align: middle;
+}
+
+.usrimg {
+    display: inline;
+    height: 45px;
+    width: 45px;
+    vertical-align: middle;
+    margin: 0.5rem 0.5rem 0.5rem 0rem;
+}
+
+.mybutton {
+    background-color: #0436aa;
+    border: none;
+    border-radius: 50%;
+    bottom: 30px;
+    color: white;
+    height: 60px;
+    position: fixed;
+    right: 30px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    width: 60px;
+}
+
+.mypodcast{
+    width: 100%;
+}
+
+.username {
+    font-weight: 100;
+}
+
+.usernamecommenti {
+    font-weight: 80;
+}
+
+.hide{
+    display: none;              /*classe che verrà aggiunta o tolta in base alla ricerca testuale di episodi*/
+}
+
+.content > section{
+    width: 100%;
+}
+
+.textLab{
+    font-weight: bold;
+}
+
+/*ID*/
+#myaside li {
+    padding-bottom: 5px;
+}
+
+#myaside ul {
+    list-style-type: none;
+    padding: 0rem 1rem;
+}
+
+#myheader h1 {
+    color: white;
+}
+
+#followButtons{
+    margin-left: 10px;
+    padding-left: 10px;
+}
+
+/*RESPONSIVE PER DISPOSITIVI */
+@media (max-width: 991.98px) {
+    #myaside ul {
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+        padding: 0rem 1rem;
+    }
+
+    aside li {
+        display: inline;
+        list-style-type: none;
+        padding: 0em;
+        width: fit-content;
+    }
+}

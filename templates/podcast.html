@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar bg-body-tertiary">
+  <div class="container-fluid d-flex">
+    <div class="container-fluid">
+      <input id="searchbarEp" class="form-control me-2" type="search" placeholder="Cerca episodio" aria-label="Search">        
+    </div>
+  </div>
+</nav>
+<main class="col-lg-9 col-md-12">
+  <article class="row border p-2 mx-2 my-4">
+    <div class="col-lg-3 col-md-6 col-sm-12 px-0">
+      <img class="w-100 p-2 ursimg" src="{{ url_for('static', filename=podcast.immagine) }}" alt="...">
+    </div>
+    <div class="col-lg-9 col-md-6 col-sm-12 content">
+      <section class="d-flex align-items-center mt-2 mb-4">
+        <h4 class="w-100">{{podcast.titolo}} creato da {{ creator |e }}</h4>
+        <h5 class="flex-grow-1 text-end me-3"><br>Seguito da {{ follows }} persone</h5>
+        {% if current_user.is_authenticated %}
+        <div id="followButton">
+          <form action="/follow" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+            <button type="submit" class="btn btn-primary btn-sm bg-success" id="followButton1">
+              Follow 
+            </button>
+          </form>
+          <form action="/unfollow" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+            <button type="submit" class="btn btn-primary btn-sm bg-danger mt-1" id="followButton2">
+            Unfollow 
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </section>
+      <h6 class="text-end"><b>Categoria</b>: {{podcast.categoria |e }}</h6>
+      <p class="descr">{{ podcast.descrizione |e }}</p>
+      <ul class="nav nav-pills flex-column" id="lista_episodi_podcast">
+        {% for episode in episodes %}
+        <hr class="border">
+        <li class="nav-item episodio">
+          <h5 class="titoloEp"><br>{{episode.titolo |e}}</h5>
+          <p class="descrEp">{{episode.descrizione}} {{episode.id_podcast}} {{episode.id_episodio}}</p>
+          <div class="flex-grow-1 text-end">
+            <p>{{ episode.data |e }}</p>
+          </div>
+          {% if current_user.is_authenticated %}
+          <div class="player">
+            <p>Premi il pulsante play per riprodurre l'episodio</p>
+            <audio controls src="{{url_for('static', filename=episode.file_audio)}}" type="audio/x-m4a">
+              Il tuo browser non supporta il file audio.
+            </audio>
+          </div>
+          {% else %}
+          <div class="flex-grow-1 text-end">
+            <p>Effettua il login o la registrazione per riprodurre l'episodio</p>
+          </div>
+          {% endif %}
+                        
+          {% if current_user.is_authenticated and current_user.tipo == 1  and current_user.id == podcast.id_creatore  %}
+          <button type="button" class="btn btn-warning text-light" data-bs-toggle="modal" data-bs-target="#createModaldel{{ episode.id_episodio}}">
+            Modifica Episodio
+          </button>
+          <div class="modal fade" id="createModaldel{{episode.id_episodio}}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5">Modifica o cancella il tuo episodio</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/episodi/change" method="POST" enctype="multipart/form-data">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <input type="hidden" name="id_episodio" value="{{ episode.id_episodio }}" />
+                      <input type="hidden" name="id_podcast" value="{{ episode.id_podcast }}" />
+                      <input type="hidden" name="old_tit" value="{{ episode.titolo }}" />
+                      <label for="usrnameTextInput" class="form-label">Nuovo Titolo</label>
+                      <input type="text" id="titoloTextInput" name="titolo" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                      <input type="hidden" name="old_descr" value="{{ episode.descrizione }}" />
+                      <label for="postTextarea" class="form-label">Cambia la descrizione dell'episodio</label>
+                      <textarea class="form-control" id="descrizioneTextarea" name="descrizione" rows="3" placeholder="Inserisci una descrizione per il tuo podcast" ></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <input type="hidden" name="old_audio" value="{{ episode.file_audio }}" />
+                      <label for="imageFile" class="form-label">Cambia file audio</label>
+                      <input class="form-control" name="file_audio" type="file" id="audioFile">     
+                    </div>
+                  </div>    
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                    <button type="submit" class="btn btn-primary">Modifica Episodio</button>
+                  </div>
+                </form>
+                <form action="/episodi/delete" method="POST" enctype="multipart/form-data">
+                  <div class="modal-footer">
+                    <input type="hidden" name="id_episodio" value="{{ episode.id_episodio }}" />
+                    <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+                    <input type="hidden" name="old_audio" value="{{ episode.file_audio }}" />
+                    <button type="submit" class="btn btn-secondary bg-danger" data-bs-dismiss="modal">Cancella episodio</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div> 
+          {% endif %}
+          <ul class="nav flex-column container-md comments">
+            {% for comment in comments %}
+            {% if comment.id_episodio == episode.id_episodio%}
+            <hr class="border">
+            <div class="col-lg-12 col-md-9 col-sm-12">
+              <section class="d-flex align-items-top mt-2 mb-4">
+                <div>
+                <h5 class="username">Commento di {{ comment.nome |e }}</h5>      
+                </div>
+                <div class="flex-grow-1 text-start px-4">
+                  <p>{{ comment.testo |e }}</p>
+                </div>
+                <div class="flex-grow-1 text-end">
+                  <p>{{ comment.data |e }}</p>
+                </div>
+                {% if current_user.is_authenticated and current_user.id == comment.id_utente %}
+                <button type="button" class="btn btn-warning text-light ms-2" data-bs-toggle="modal" data-bs-target="#createModalcomm{{comment.id_commento}}">
+                  Modifica commento
+                </button>
+                <div class="modal fade" id="createModalcomm{{comment.id_commento}}" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5">Modifica o cancella il tuo commento</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form action="/commenti/change" method="POST" enctype="multipart/form-data">
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <textarea class="form-control" id="testoInput" rows="1" placeholder="Cambia il testo del commento..." name="testo"></textarea>
+                            <input type="hidden" name="id_podcast" value="{{ episode.id_podcast }}" />
+                            <input type="hidden" name="id_commento" value="{{ comment.id_commento }}" />
+                            <input type="hidden" name="id_episodio" value="{{ episode.id_episodio }}" />
+                          </div>
+                        </div>    
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                          <button type="submit" class="btn btn-success btn-sm w-100">Modifica commento</button>
+                        </div>
+                      </form>
+                      <form action="/commenti/delete" method="POST">
+                        <div class="pt-2 text-end">
+                          <input type="hidden" name="id_podcast" value="{{ episode.id_podcast }}" />
+                          <input type="hidden" name="id_episodio" value="{{ episode.id_episodio }}" />
+                          <input type="hidden" name="id_commento" value="{{ comment.id_commento }}" />
+                          <button type="submit" class="btn btn-danger btn-sm">Cancella commento</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div> 
+                {% endif %}
+              </section>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            {% if current_user.is_authenticated %}
+            <hr class="border">
+            <form action="/commenti/new" method="POST">
+              <div class="mb-3">
+                <textarea class="form-control" rows="2" placeholder="Nuovo commento..." name="testo"></textarea>
+                <input type="hidden" name="id_podcast" value="{{ episode.id_podcast }}" />
+                <input type="hidden" name="id_episodio" value="{{ episode.id_episodio }}" />
+                <div class="pt-2 text-end">
+                  <button type="submit" class="btn btn-success btn-sm">Invia</button>
+                </div>
+              </div>
+            </form>
+            {% endif %}
+          </ul> 
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </article>
+</main>
+
+{% if current_user.is_authenticated and current_user.tipo == 1  and current_user.id == podcast.id_creatore  %}
+<button type="button" class="mybutton" data-bs-toggle="modal" data-bs-target="#createModal1">
+  +
+</button>
+<div class="modal fade" id="createModal1" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Crea un nuovo Episodio</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/episodi/new" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="usrnameTextInput" class="form-label">Titolo</label>
+            <input type="text" id="titoloTextInput" name="titolo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label for="postTextarea" class="form-label">Inserisci la descrizione dell'episodio</label>
+            <textarea class="form-control" id="descrizioneTextarea" name="descrizione" rows="3"
+              placeholder="Inserisci una descrizione per l'episodio" maxlength="300"></textarea>
+            <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+          </div>
+          <div class="mb-3">
+            <label for="imageFile" class="form-label">Inserisci file audio</label>
+            <input class="form-control" name="file_audio" type="file" id="audioFile">     
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Crea Episodio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if current_user.is_authenticated and current_user.tipo == 1  and current_user.id == podcast.id_creatore  %}
+<button type="button" class="btn btn-warning text-light btn-sm" data-bs-toggle="modal" data-bs-target="#createModalP{{podcast.id_podcast}}">
+  Modifica Podcast
+</button>
+<div class="modal fade" id="createModalP{{podcast.id_podcast}}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Modifica o cancella il tuo podcast</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/podcasts/change" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+            <input type="hidden" name="old_tit" value="{{ podcast.titolo }}" />
+            <label for="usrnameTextInput" class="form-label">Nuovo Titolo</label>
+            <input type="text" id="titoloTextInput" name="titolo" class="form-control">
+          </div>
+          <div class="mb-3">
+            <input type="hidden" name="old_descr" value="{{ podcast.descrizione }}" />
+            <label for="postTextarea" class="form-label">Cambia la descrizione del podcast</label>
+            <textarea class="form-control" id="descrizioneTextarea" name="descrizione" rows="3"
+              placeholder="Inserisci una descrizione per il tuo podcast"  maxlength="700"></textarea>
+          </div>
+          <div class="mb-3">
+            <input type="hidden" name="old_immagine" value="{{ podcast.immagine }}" />
+            <label for="imageFile" class="form-label">Cambia immagine podcast</label>
+            <input type="file" dd="imageFile" name="immagine" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Modifica Podcast</button>
+        </div>
+      </form>
+      <form action="/podcasts/delete" method="POST" enctype="multipart/form-data">
+        <div class="modal-footer">
+        </div>
+          <input type="hidden" name="id_podcast" value="{{ podcast.id_podcast }}" />
+          <input type="hidden" name="old_immagine" value="{{ podcast.immagine }}" />
+          <button type="submit" class="btn btn-secondary bg-danger" data-bs-dismiss="modal">Cancella podcast</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
